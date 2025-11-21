@@ -33,7 +33,7 @@
             <!-- Staff Menu -->
             <VBox fx:id="staffMenu" spacing="5">
                 <Label text="Staff Menu" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
-                <Button text="Inventory" onAction="#openInventory" />
+                <Button fx:id="inventoryButton" text="Inventory" onAction="#openInventory"/>
                 <Button text="Orders" onAction="#openOrders" />
             </VBox>
 
