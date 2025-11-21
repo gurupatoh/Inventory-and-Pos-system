@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.app.inventory.controllers.DashboardController"
+            prefWidth="800" prefHeight="600">
+
+    <!-- Top Bar -->
+    <top>
+        <HBox spacing="20" style="-fx-background-color: #2C3E50; -fx-padding: 10;">
+            <Label fx:id="welcomeLabel" style="-fx-text-fill: white; -fx-font-size: 16px;"/>
+            <Button fx:id="logoutButton" text="Logout" onAction="#handleLogout" />
+        </HBox>
+    </top>
+
+    <!-- Left Menu -->
+    <left>
+        <VBox spacing="10" style="-fx-background-color: #34495E; -fx-padding: 15;">
+
+            <!-- Admin Menu -->
+            <VBox fx:id="adminMenu" spacing="5">
+                <Label text="Admin Menu" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="User Management" onAction="#openReports" />
+                <Button text="System Settings" onAction="#openReports" />
+            </VBox>
+
+            <!-- Staff Menu -->
+            <VBox fx:id="staffMenu" spacing="5">
+                <Label text="Staff Menu" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button text="Inventory" onAction="#openInventory" />
+                <Button text="Orders" onAction="#openOrders" />
+            </VBox>
+
+        </VBox>
+    </left>
+
+    <!-- Main Content Area -->
+    <center>
+        <VBox fx:id="mainContent" style="-fx-padding: 20;" spacing="10"/>
+    </center>
+
+</BorderPane>

@@ -1,0 +1,45 @@
+plugins {
+    id 'java'
+    id 'application'
+    id 'org.openjfx.javafxplugin' version '0.0.14'
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17) // Use JDK 17
+    }
+}
+
+dependencies {
+    // JavaFX 17 dependencies (compatible with JDK 17)
+    implementation 'org.openjfx:javafx-base:17.0.2'
+    implementation 'org.openjfx:javafx-graphics:17.0.2'
+    implementation 'org.openjfx:javafx-controls:17.0.2'
+    implementation 'org.openjfx:javafx-fxml:17.0.2'
+
+    // SQLite JDBC
+    implementation 'org.xerial:sqlite-jdbc:3.45.2.0'
+}
+
+javafx {
+    version = "17.0.2"
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
+}
+
+application {
+    mainClass = 'com.app.inventory.Main' // Replace with your actual main class
+}
+
+run {
+    // Ensure runtime knows where to find JavaFX modules
+    doFirst {
+        jvmArgs = [
+                "--module-path", configurations.runtimeClasspath.asPath,
+                "--add-modules", "javafx.controls,javafx.fxml"
+        ]
+    }
+}
