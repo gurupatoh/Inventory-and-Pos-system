@@ -26,7 +26,7 @@
             <!-- Admin Menu -->
             <VBox fx:id="adminMenu" spacing="5">
                 <Label text="Admin Menu" style="-fx-text-fill: white; -fx-font-weight: bold;"/>
-                <Button text="User Management" onAction="#openReports" />
+                <Button text="User Management" onAction="#handleUserManagement" />
                 <Button text="System Settings" onAction="#openReports" />
             </VBox>
 

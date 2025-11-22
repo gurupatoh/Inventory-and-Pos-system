@@ -1,6 +1,6 @@
 package com.app.inventory;
 
-import com.app.inventory.config.DBConnection;
+import com.app.inventory.db.DatabaseInitializer;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -11,8 +11,8 @@ public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
 
-        // TEST DATABASE INIT — should print confirmation
-        DBConnection.getConnection();
+        // Initialize database tables and bootstrap admin
+        DatabaseInitializer.initialize();
 
         FXMLLoader loader = new FXMLLoader(
                 getClass().getResource("/fxml/login.fxml")

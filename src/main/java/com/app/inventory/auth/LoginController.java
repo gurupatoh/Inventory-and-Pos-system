@@ -27,7 +27,7 @@ public class LoginController {
         String password = passwordField.getText();
 
         // Authenticate via AuthService
-        User user = authService.login(username, password);
+        User user = authService.login(username, password, "127.0.0.1", "JavaFX App");
 
         if (user == null) {
             showAlert("Login Failed", "Invalid username or password!", Alert.AlertType.ERROR);

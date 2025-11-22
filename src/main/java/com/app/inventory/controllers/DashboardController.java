@@ -4,7 +4,9 @@ import com.app.inventory.auth.SessionManager;
 import com.app.inventory.models.User;
 import com.app.inventory.models.Role;
 import com.app.inventory.models.InventoryType;
+import com.app.inventory.services.AuditService;
 import com.app.inventory.utils.SceneSwitcher;
+
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
@@ -85,6 +87,12 @@ public class DashboardController {
     }
 
     @FXML
+    private void handleUserManagement() {
+        Stage stage = (Stage) welcomeLabel.getScene().getWindow();
+        SceneSwitcher.switchTo(stage, "user_management.fxml");
+    }
+
+    @FXML
     private void openReports() {
         if (mainContent != null) {
             mainContent.getChildren().clear();
@@ -94,6 +102,12 @@ public class DashboardController {
 
     @FXML
     private void handleLogout() {
+        // Log logout before clearing session
+        User currentUser = SessionManager.getUser();
+        if (currentUser != null) {
+            AuditService.logLogout(currentUser, "127.0.0.1", "JavaFX App");
+        }
+
         SessionManager.clearSession();
         Stage stage = (Stage) welcomeLabel.getScene().getWindow();
         SceneSwitcher.switchTo(stage, "login.fxml");
@@ -107,4 +121,5 @@ public class DashboardController {
             mainContent.getChildren().add(defaultLabel);
         }
     }
+
 }

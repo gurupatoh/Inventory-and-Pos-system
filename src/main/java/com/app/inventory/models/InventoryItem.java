@@ -4,19 +4,16 @@ public class InventoryItem {
     private int id;
     private String name;
     private int quantity;
-    private int unit; // e.g., bottles, kg, pieces
     private InventoryType type; // CLUB or RESTAURANT
     private double price;
 
 
-
-    public InventoryItem(int id, String name, int quantity, int unit, InventoryType type) {
+    public InventoryItem(int id, String name, int quantity, double price, InventoryType type) {
         this.id = id;
         this.name = name;
         this.quantity = quantity;
-        this.unit = unit;
-        this.type = type;
         this.price = price;
+        this.type = type;
     }
 
     // Getters and Setters
@@ -28,9 +25,6 @@ public class InventoryItem {
 
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
-
-    public int getUnit() { return unit; }
-    public void setUnit(int unit) { this.unit = unit; }
 
     public InventoryType getType() { return type; }
     public void setType(InventoryType type) { this.type = type; }

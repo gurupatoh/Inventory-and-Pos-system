@@ -1,29 +1,24 @@
 package com.app.inventory.auth;
 
-import com.app.inventory.models.InventoryType;
+import com.app.inventory.dao.SessionDAO;
 import com.app.inventory.models.User;
 
 public class SessionManager {
+    private static User user;
 
-    private static User currentUser;
-
-    public static void setUser(User user) {
-        currentUser = user;
+    public static void setUser(User u) {
+        user = u;
+        if (u != null) {
+            SessionDAO.saveSession(u.getUsername());
+        }
     }
 
     public static User getUser() {
-        return currentUser;
+        return user;
     }
 
     public static void clearSession() {
-        currentUser = null;
-    }
-
-    // Utility method to get the assigned inventory type for the current user
-    public static InventoryType getAssignedInventoryType() {
-        if (currentUser != null) {
-            return currentUser.getAssignedInventoryType();
-        }
-        return null;
+        user = null;
+        SessionDAO.clear();
     }
 }

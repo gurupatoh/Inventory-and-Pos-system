@@ -1,8 +1,11 @@
 package com.app.inventory.controllers;
 
-import com.app.inventory.datastore.DataStore;
+import com.app.inventory.auth.SessionManager;
+import com.app.inventory.dao.InventoryDAO;
+import com.app.inventory.models.User;
 import com.app.inventory.models.InventoryItem;
 import com.app.inventory.models.InventoryType;
+import com.app.inventory.services.AuditService;
 import com.app.inventory.utils.SceneSwitcher;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -34,7 +37,7 @@ public class InventoryController {
     private ComboBox<String> filterTypeCombo;
 
     private ObservableList<InventoryItem> inventoryList;
-    private InventoryType preFilterType = null;
+    private InventoryType forcedType; // set by SceneSwitcher
 
     @FXML
     public void initialize() {
@@ -43,8 +46,8 @@ public class InventoryController {
         loadInventoryData();
 
         // Apply pre-filter if staff
-        if (preFilterType != null) {
-            filterTypeCombo.setValue(preFilterType.toString());
+        if (forcedType != null) {
+            filterTypeCombo.setValue(forcedType.toString());
             applyFilters();
         }
 
@@ -73,8 +76,18 @@ public class InventoryController {
      * Load all inventory items into the table
      */
     private void loadInventoryData() {
-        inventoryList = FXCollections.observableArrayList(DataStore.getAllInventory());
+        if (forcedType == null || forcedType == InventoryType.ALL) {
+            inventoryList = FXCollections.observableArrayList(InventoryDAO.getAll());
+        } else {
+            inventoryList = FXCollections.observableArrayList(InventoryDAO.getByType(forcedType));
+        }
         inventoryTable.setItems(inventoryList);
+
+        // Log audit
+        User user = SessionManager.getUser();
+        if (user != null) {
+            AuditService.logInventoryAccess(user, forcedType != null ? forcedType.name() : "ALL", "127.0.0.1", "JavaFX App");
+        }
     }
 
     /**
@@ -97,8 +110,7 @@ public class InventoryController {
     }
 
     public void setFilterType(InventoryType type) {
-        this.preFilterType = type;
-
+        this.forcedType = type;
     }
 
     @FXML

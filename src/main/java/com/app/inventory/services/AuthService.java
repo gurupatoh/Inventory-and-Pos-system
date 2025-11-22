@@ -1,37 +1,30 @@
 package com.app.inventory.services;
 
+import com.app.inventory.dao.UserDAO;
 import com.app.inventory.models.User;
-import com.app.inventory.models.Role;
-import com.app.inventory.repository.UserRepository;
+import com.app.inventory.services.AuditService;
 
 public class AuthService {
 
-    private final UserRepository userRepository = new UserRepository();
+    public User login(String username, String password, String ip, String ua) {
+        // find user record
+        User stored = UserDAO.findByUsername(username);
+        if (stored == null) return null;
 
-    /**
-     * Login user by username and password.
-     * Only ADMIN and STAFF roles are allowed.
-     *
-     * @param username the username
-     * @param password the password
-     * @return User if valid credentials and role, otherwise null
-     */
-    public User login(String username, String password) {
-        User user = userRepository.findByUsername(username);
+        // verify password with bcrypt
+        boolean ok = UserDAO.verifyPassword(username, password);
+        if (!ok) return null;
 
-        if (user == null) {
-            return null; // User not found
-        }
+        // Update last login
+        UserDAO.updateLastLogin(username);
 
-        if (!user.getPassword().equals(password)) {
-            return null; // Incorrect password
-        }
+        // Log audit
+        AuditService.logLogin(stored, ip, ua);
 
-        // Ensure only ADMIN and STAFF roles can login
-        if (user.getRole() != Role.ADMIN && user.getRole() != Role.STAFF) {
-            return null; // Invalid role
-        }
-
-        return user;
+        // Return a safe user object — stored currently has hashed password in password field.
+        // If you prefer, create a new User with same details but password=null.
+        User result = new User(stored.getUsername(), "", stored.getRole(), stored.getAssignedInventoryType());
+        result.setId(stored.getId()); // Set id for session
+        return result;
     }
 }
