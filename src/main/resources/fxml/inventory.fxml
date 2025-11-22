@@ -25,14 +25,18 @@
     <!-- Table -->
     <TableView fx:id="inventoryTable" prefHeight="400" VBox.vgrow="ALWAYS">
         <columns>
-            <TableColumn fx:id="colName" text="Name" prefWidth="200"/>
-            <TableColumn fx:id="colQuantity" text="Quantity" prefWidth="100"/>
-            <TableColumn fx:id="colPrice" text="Price" prefWidth="100"/>
+            <TableColumn fx:id="colName" text="Name" prefWidth="180"/>
+            <TableColumn fx:id="colQuantity" text="Quantity" prefWidth="90"/>
+            <TableColumn fx:id="colPrice" text="Price" prefWidth="90"/>
             <TableColumn fx:id="colType" text="Type" prefWidth="120"/>
+            <TableColumn fx:id="colTotal" text="Total" prefWidth="90"/>
         </columns>
     </TableView>
 
-    <!-- Footer Buttons -->
+    <!-- Summary -->
+    <Label fx:id="totalValueLabel" text="Total Inventory Value: $0.00" alignment="CENTER_LEFT"/>
+
+
     <HBox spacing="10" alignment="CENTER_RIGHT">
         <Button text="Add Item" onAction="#handleAddItem"/>
         <Button text="Edit Item" onAction="#handleEditItem"/>

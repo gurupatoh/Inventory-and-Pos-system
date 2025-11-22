@@ -32,7 +32,11 @@ public class DatabaseInitializer {
                     name TEXT NOT NULL,
                     quantity INTEGER NOT NULL,
                     price REAL NOT NULL,
-                    type TEXT NOT NULL
+                    type TEXT NOT NULL,
+                    drink_category TEXT,
+                    creator_id INTEGER NOT NULL,
+                    created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+                    FOREIGN KEY (creator_id) REFERENCES users(id)
                 );
             """);
 
@@ -46,12 +50,21 @@ public class DatabaseInitializer {
 
             // Schema migrations for users table
             try {
-                st.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS created_at TEXT DEFAULT CURRENT_TIMESTAMP");
-                st.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS last_login TEXT");
-                st.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_active INTEGER DEFAULT 1");
-                st.execute("ALTER TABLE users ADD COLUMN IF NOT EXISTS created_by TEXT");
+                st.execute("ALTER TABLE users ADD COLUMN created_at TEXT DEFAULT CURRENT_TIMESTAMP");
+                st.execute("ALTER TABLE users ADD COLUMN last_login TEXT");
+                st.execute("ALTER TABLE users ADD COLUMN is_active INTEGER DEFAULT 1");
+                st.execute("ALTER TABLE users ADD COLUMN created_by TEXT");
             } catch (SQLException e) {
                 System.out.println("Schema migration ignored (columns may already exist): " + e.getMessage());
+            }
+
+            // Schema migrations for inventory table
+            try {
+                st.execute("ALTER TABLE inventory ADD COLUMN creator_id INTEGER");
+                st.execute("ALTER TABLE inventory ADD COLUMN created_at TEXT DEFAULT CURRENT_TIMESTAMP");
+                // Note: FOREIGN KEY can't be added via ALTER TABLE in SQLite; it's declaration only
+            } catch (SQLException e) {
+                System.out.println("Inventory schema migration ignored: " + e.getMessage());
             }
 
             st.execute("""

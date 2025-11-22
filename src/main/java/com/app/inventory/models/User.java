@@ -21,8 +21,13 @@ public class User {
         this.password = password;
         this.role = role;
 
-        // Default: Admin sees ALL; Staff must be assigned manually later
-        this.assignedInventoryType = InventoryType.ALL;
+        // Default: Admin sees ALL; Staff must be assigned explicitly
+        if (role == Role.ADMIN) {
+            this.assignedInventoryType = InventoryType.ALL;
+        } else {
+            // Staff require explicit assignment - this should not be called for staff
+            throw new IllegalArgumentException("Staff users must be assigned an inventory type.");
+        }
         this.isActive = true;
     }
 
@@ -30,7 +35,7 @@ public class User {
         this.username = username;
         this.password = password;
         this.role = role;
-        this.assignedInventoryType = assignedInventoryType;
+        this.assignedInventoryType = assignedInventoryType != null ? assignedInventoryType : InventoryType.ALL;
         this.isActive = true;
     }
 

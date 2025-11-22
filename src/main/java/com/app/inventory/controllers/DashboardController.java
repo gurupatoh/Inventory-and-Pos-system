@@ -66,14 +66,17 @@ public class DashboardController {
         Stage stage = (Stage) inventoryButton.getScene().getWindow();
 
         if (currentUser.getRole() == Role.ADMIN) {
-            SceneSwitcher.switchTo(stage, "inventory.fxml", null); // Admin sees all
+            SceneSwitcher.switchTo(stage, "inventory.fxml"); // Admin sees all
         } else if (currentUser.getRole() == Role.STAFF) {
             InventoryType type = currentUser.getAssignedInventoryType();
-            if (type != null) {
-                SceneSwitcher.switchTo(stage, "inventory.fxml", type); // Staff sees only assigned type
+            if (type == InventoryType.CLUB) {
+                SceneSwitcher.switchTo(stage, "club.fxml");
+            } else if (type == InventoryType.RESTAURANT) {
+                SceneSwitcher.switchTo(stage, "restaurant.fxml");
             } else {
                 // Staff without assigned inventory can't access
                 System.out.println("Access denied: no assigned inventory type");
+                showAlert("Access Denied", "You are not assigned to any inventory type.", javafx.scene.control.Alert.AlertType.ERROR);
             }
         }
     }
@@ -120,6 +123,14 @@ public class DashboardController {
             defaultLabel.setStyle("-fx-font-size: 16px;");
             mainContent.getChildren().add(defaultLabel);
         }
+    }
+
+    private void showAlert(String title, String msg, javafx.scene.control.Alert.AlertType type) {
+        javafx.scene.control.Alert alert = new javafx.scene.control.Alert(type);
+        alert.setTitle(title);
+        alert.setHeaderText(null);
+        alert.setContentText(msg);
+        alert.showAndWait();
     }
 
 }

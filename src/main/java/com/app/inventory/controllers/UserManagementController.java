@@ -65,39 +65,56 @@ public class UserManagementController {
 
     @FXML
     private void handleAddUser() {
-        // Simple dialog for demo
+        // Get username
         TextInputDialog usernameDialog = new TextInputDialog();
         usernameDialog.setTitle("Add User");
         usernameDialog.setHeaderText("Enter Username");
         usernameDialog.setContentText("Username:");
 
         usernameDialog.showAndWait().ifPresent(username -> {
+            // Get password
             TextInputDialog passwordDialog = new TextInputDialog();
             passwordDialog.setTitle("Add User");
-            passwordDialog.setHeaderText("Enter Password");
+            passwordDialog.setHeaderText("Enter Password (min 6 characters)");
             passwordDialog.setContentText("Password:");
 
             passwordDialog.showAndWait().ifPresent(password -> {
+                // Get role
                 ChoiceDialog<String> roleDialog = new ChoiceDialog<>("STAFF", "ADMIN", "STAFF");
                 roleDialog.setTitle("Add User");
                 roleDialog.setHeaderText("Select Role");
                 roleDialog.setContentText("Role:");
 
-                roleDialog.showAndWait().ifPresent(role -> {
-                    ChoiceDialog<String> typeDialog = new ChoiceDialog<>("RESTAURANT", "CLUB", "RESTAURANT", "ALL");
+                roleDialog.showAndWait().ifPresent(roleStr -> {
+                    Role selectedRole = Role.valueOf(roleStr);
+                    
+                    // Get inventory type based on role
+                    ChoiceDialog<String> typeDialog;
+                    if (selectedRole == Role.ADMIN) {
+                        // Admins get ALL access
+                        typeDialog = new ChoiceDialog<>("ALL", "ALL");
+                    } else {
+                        // Staff get specific inventory type
+                        typeDialog = new ChoiceDialog<>("CLUB", "CLUB", "RESTAURANT");
+                    }
+                    
                     typeDialog.setTitle("Add User");
                     typeDialog.setHeaderText("Select Inventory Type");
                     typeDialog.setContentText("Type:");
 
-                    typeDialog.showAndWait().ifPresent(type -> {
-                        User newUser = new User(username, password, Role.valueOf(role),
-                                type.equals("ALL") ? InventoryType.ALL : InventoryType.valueOf(type));
+                    typeDialog.showAndWait().ifPresent(typeStr -> {
+                        InventoryType inventoryType = InventoryType.valueOf(typeStr);
+                        
+                        // Create user with proper validation
+                        User newUser = new User(username, password, selectedRole, inventoryType);
                         boolean success = UserManagementService.addUser(currentAdmin, newUser, "127.0.0.1", "JavaFX App");
                         if (success) {
-                            showAlert("Success", "User added successfully.", Alert.AlertType.INFORMATION);
+                            String successMsg = String.format("User '%s' added successfully as %s with %s access.", 
+                                    username, selectedRole, inventoryType);
+                            showAlert("Success", successMsg, Alert.AlertType.INFORMATION);
                             loadUsers();
                         } else {
-                            showAlert("Error", "Failed to add user.", Alert.AlertType.ERROR);
+                            showAlert("Error", "Failed to add user. Please check if username already exists.", Alert.AlertType.ERROR);
                         }
                     });
                 });
