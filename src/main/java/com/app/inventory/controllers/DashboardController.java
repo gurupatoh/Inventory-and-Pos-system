@@ -36,7 +36,7 @@ public class DashboardController {
     public void initialize() {
         currentUser = SessionManager.getUser();
         if (currentUser != null) {
-            welcomeLabel.setText("Welcome, " + currentUser.getUsername() + " (" + currentUser.getRole() + ")");
+            welcomeLabel.setText("Welcome, " + currentUser.getUsername());
         }
 
         setupMenuAccess();   // <--- Make sure menu visibility is applied

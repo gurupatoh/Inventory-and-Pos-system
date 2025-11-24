@@ -9,14 +9,15 @@
       fx:controller="com.app.inventory.controllers.ClubInventoryController"
       spacing="15">
 
-    <!-- Proper padding using Insets -->
+    <!-- Padding -->
     <padding>
         <Insets top="15" right="15" bottom="15" left="15"/>
     </padding>
 
     <!-- Header -->
     <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Club Inventory Management" style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+        <Label text="Club Inventory Management"
+               style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
         <Region HBox.hgrow="ALWAYS"/>
         <Label text="Filter by Category:"/>
         <ComboBox fx:id="filterTypeCombo" prefWidth="120"/>
@@ -35,7 +36,9 @@
     </TableView>
 
     <!-- Summary -->
-    <Label fx:id="totalValueLabel" text="Total Club Inventory Value: $0.00" alignment="CENTER_LEFT"/>
+    <Label fx:id="totalValueLabel"
+           text="Total Club Inventory Value: $0.00"
+           alignment="CENTER_LEFT"/>
 
     <!-- Buttons -->
     <HBox spacing="10" alignment="CENTER_RIGHT">

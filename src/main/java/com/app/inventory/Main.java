@@ -19,6 +19,11 @@ public class Main extends Application {
         );
 
         Scene scene = new Scene(loader.load());
+
+        // Load CSS stylesheet
+        String css = getClass().getResource("/css/main.css").toExternalForm();
+        scene.getStylesheets().add(css);
+
         stage.setTitle("Login - Inventory System");
         stage.setScene(scene);
         stage.show();
