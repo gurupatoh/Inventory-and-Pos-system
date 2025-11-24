@@ -1,296 +1,163 @@
 package com.app.inventory.controllers;
 
-import com.app.inventory.auth.SessionManager;
 import com.app.inventory.dao.InventoryDAO;
-import com.app.inventory.models.User;
 import com.app.inventory.models.InventoryItem;
 import com.app.inventory.models.InventoryType;
-import com.app.inventory.models.Role;
-import com.app.inventory.services.AuditService;
-import com.app.inventory.utils.SceneSwitcher;
-import javafx.beans.property.SimpleDoubleProperty;
+import com.app.inventory.auth.SessionManager;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.MouseEvent;
+import javafx.fxml.FXMLLoader;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
+import com.app.inventory.utils.SceneSwitcher;
+import java.net.URL;
+import java.util.List;
 
 public class InventoryController {
 
     @FXML
     private TableView<InventoryItem> inventoryTable;
-
     @FXML
     private TableColumn<InventoryItem, String> colName;
-
+    @FXML
+    private TableColumn<InventoryItem, String> colType;
     @FXML
     private TableColumn<InventoryItem, Integer> colQuantity;
-
     @FXML
     private TableColumn<InventoryItem, Double> colPrice;
-
     @FXML
-    private TableColumn<InventoryItem, InventoryType> colType;
-
+    private TableColumn<InventoryItem, String> colTotal;
     @FXML
-    private TableColumn<InventoryItem, Double> colTotal;
-
+    private TableColumn<InventoryItem, String> colDate;
     @FXML
     private ComboBox<String> filterTypeCombo;
-
     @FXML
     private Label totalValueLabel;
 
-    private ObservableList<InventoryItem> inventoryList;
-    private InventoryType forcedType;
+    private InventoryType filterType;
 
-    @FXML
     public void initialize() {
-        setupTable();
-        setupFilters();
-        loadInventoryData();
+        colName.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getName()));
+        colQuantity.setCellValueFactory(new PropertyValueFactory<InventoryItem, Integer>("quantity"));
+        colPrice.setCellValueFactory(new PropertyValueFactory<InventoryItem, Double>("price"));
+        colType.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getType().name()));
+        colTotal.setCellValueFactory(cell -> new SimpleStringProperty(
+                String.format("$%.2f", cell.getValue().getQuantity() * cell.getValue().getPrice())));
+        colDate.setCellValueFactory(cell -> new SimpleStringProperty(cell.getValue().getCreatedAt()));
 
-        filterTypeCombo.setOnAction(e -> applyFilters());
-    }
-
-    private void setupTable() {
-        colName.setCellValueFactory(new PropertyValueFactory<>("name"));
-        colQuantity.setCellValueFactory(new PropertyValueFactory<>("quantity"));
-        colPrice.setCellValueFactory(new PropertyValueFactory<>("price"));
-        colType.setCellValueFactory(new PropertyValueFactory<>("type"));
-        colTotal.setCellValueFactory(param -> new SimpleDoubleProperty(param.getValue().getTotalPrice()).asObject());
-    }
-
-    private void setupFilters() {
-        User user = SessionManager.getUser();
-        com.app.inventory.utils.AccessControl accessControl = new com.app.inventory.utils.AccessControl(user);
-        if (accessControl.isAdmin()) {
-            filterTypeCombo.getItems().addAll("All", "CLUB", "RESTAURANT");
-            filterTypeCombo.setValue("All");
+        // Setup filter combo box
+        if (SessionManager.getUser() != null && SessionManager.getUser().getRole().name().equals("STAFF")) {
+            // Staff can only see their assigned type (no ALL option)
+            InventoryType assigned = SessionManager.getUser().getAssignedInventoryType();
+            filterTypeCombo.setItems(FXCollections.observableArrayList(assigned.name()));
+            filterType = assigned; // Default to their type
+            filterTypeCombo.setValue(assigned.name());
         } else {
-            // Staff can filter by both types, but can only access/view their assigned type
-            filterTypeCombo.getItems().addAll("CLUB", "RESTAURANT");
-            filterTypeCombo.setValue(user.getAssignedInventoryType().name());
-        }
-    }
-
-    private void loadInventoryData() {
-        User user = SessionManager.getUser();
-        com.app.inventory.utils.AccessControl accessControl = new com.app.inventory.utils.AccessControl(user);
-
-        String selectedFilter = filterTypeCombo.getValue();
-        InventoryType filterType = null;
-        if (selectedFilter != null && !selectedFilter.equals("All")) {
-            filterType = InventoryType.valueOf(selectedFilter);
+            // Admin sees all types including ALL
+            filterTypeCombo.setItems(FXCollections.observableArrayList(
+                    InventoryType.CLUB.name(), InventoryType.RESTAURANT.name(), InventoryType.ALL.name()
+            ));
+            filterType = InventoryType.ALL; // Default to all
+            filterTypeCombo.setValue(InventoryType.ALL.name());
         }
 
-        if (accessControl.isAdmin()) {
-            if (filterType == null || filterType == InventoryType.ALL) {
-                inventoryList = FXCollections.observableArrayList(InventoryDAO.getAll());
-            } else {
-                inventoryList = FXCollections.observableArrayList(InventoryDAO.getByType(filterType));
-            }
-        } else {
-            // Staff can only see items of their assigned type
-            if (filterType != null && accessControl.canAccessInventory(filterType)) {
-                inventoryList = FXCollections.observableArrayList(InventoryDAO.getByType(filterType));
-            } else {
-                inventoryList = FXCollections.observableArrayList();
-            }
-        }
-        inventoryTable.setItems(inventoryList);
-        updateTotalLabel();
+        filterTypeCombo.setOnAction(e -> {
+            String selected = filterTypeCombo.getValue();
+            filterType = InventoryType.valueOf(selected);
+            loadData();
+        });
 
-        if (user != null) {
-            AuditService.logInventoryAccess(user, selectedFilter != null ? selectedFilter : "ALL", "127.0.0.1", "JavaFX App");
-        }
-    }
-
-    private void updateTotalLabel() {
-        double total = inventoryTable.getItems().stream().mapToDouble(InventoryItem::getTotalPrice).sum();
-        totalValueLabel.setText("Total Inventory Value: $" + String.format("%.2f", total));
-    }
-
-    @FXML
-    private void applyFilters() {
-        String selectedType = filterTypeCombo.getValue();
-        if (selectedType == null || selectedType.equals("All")) {
-            inventoryTable.setItems(inventoryList);
-        } else {
-            InventoryType type = InventoryType.valueOf(selectedType);
-            ObservableList<InventoryItem> filteredList = FXCollections.observableArrayList(
-                    inventoryList.filtered(item -> item.getType() == type)
-            );
-            inventoryTable.setItems(filteredList);
-        }
-        updateTotalLabel();
+        loadData();
     }
 
     public void setFilterType(InventoryType type) {
-        this.forcedType = type;
+        this.filterType = type;
+        filterTypeCombo.setValue(type.name());
+        loadData();
+    }
+
+    public void loadData() {
+        if (filterType == null) filterType = InventoryType.ALL;
+        List<InventoryItem> items;
+        if (filterType == InventoryType.ALL) {
+            items = InventoryDAO.getInventoryByType(InventoryType.CLUB);
+            items.addAll(InventoryDAO.getInventoryByType(InventoryType.RESTAURANT));
+        } else {
+            items = InventoryDAO.getInventoryByType(filterType);
+        }
+        inventoryTable.setItems(FXCollections.observableArrayList(items));
+
+        // Calculate total inventory value
+        double totalValue = items.stream()
+                .mapToDouble(item -> item.getQuantity() * item.getPrice())
+                .sum();
+
+        if (totalValueLabel != null) {
+            totalValueLabel.setText(String.format("Total Inventory Value: $%.2f", totalValue));
+        }
     }
 
     @FXML
-    private void handleAddItem() {
-        addOrEditItem(null);
-    }
-
-    @FXML
-    private void handleEditItem() {
+    public void handleDelete(MouseEvent event) {
         InventoryItem selected = inventoryTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("No Selection", "Please select an item to edit.", Alert.AlertType.WARNING);
-            return;
-        }
-        User currentUser = SessionManager.getUser();
-        com.app.inventory.utils.AccessControl accessControl = new com.app.inventory.utils.AccessControl(currentUser);
-        if (!accessControl.canModifyInventoryItem(selected.getType())) {
-            showAlert("Access Denied", "You can only edit items of your assigned type.", Alert.AlertType.ERROR);
-            return;
-        }
-        addOrEditItem(selected);
-    }
-
-    @FXML
-    private void handleDeleteItem() {
-        InventoryItem selected = inventoryTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            showAlert("No Selection", "Please select an item to delete.", Alert.AlertType.WARNING);
-            return;
-        }
-        User currentUser = SessionManager.getUser();
-        com.app.inventory.utils.AccessControl accessControl = new com.app.inventory.utils.AccessControl(currentUser);
-        if (!accessControl.canModifyInventoryItem(selected.getType())) {
-            showAlert("Access Denied", "You can only delete items of your assigned type.", Alert.AlertType.ERROR);
-            return;
-        }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Delete Item");
-        confirm.setHeaderText("Are you sure you want to delete '" + selected.getName() + "'?");
-        confirm.showAndWait().ifPresent(response -> {
-            if (response == ButtonType.OK) {
-                InventoryDAO.deleteById(selected.getId());
-                User currentUser2 = SessionManager.getUser();
-                if (currentUser2 != null) {
-                    AuditService.logInventoryDelete(currentUser2, selected.getName(), "127.0.0.1", "JavaFX App");
-                }
-                loadInventoryData();
-                showAlert("Success", "Item deleted successfully.", Alert.AlertType.INFORMATION);
+        if (selected != null) {
+            if (InventoryDAO.deleteInventory(selected.getId())) {
+                loadData();
             }
-        });
+        }
     }
 
-    private void addOrEditItem(InventoryItem existing) {
-        boolean isEdit = existing != null;
+    @FXML
+    public void handleAddItem() {
+        openAddEditDialog(null);
+    }
 
-        TextInputDialog nameDialog = new TextInputDialog(isEdit ? existing.getName() : "");
-        nameDialog.setTitle(isEdit ? "Edit Item" : "Add Item");
-        nameDialog.setHeaderText("Enter Item Name");
-        nameDialog.setContentText("Name:");
+    @FXML
+    public void handleEditItem() {
+        InventoryItem selected = inventoryTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            // Show alert or do nothing
+            return;
+        }
+        openAddEditDialog(selected);
+    }
 
-        nameDialog.showAndWait().ifPresent(name -> {
-            if (name.trim().isEmpty()) {
-                showAlert("Invalid Input", "Item name cannot be empty.", Alert.AlertType.ERROR);
+    void openAddEditDialog(InventoryItem item) {
+        try {
+            FXMLLoader loader = new FXMLLoader();
+            URL res = getClass().getResource("/fxml/add_edit_inventory.fxml");
+            if (res == null) {
+                System.err.println("FXML not found: /fxml/add_edit_inventory.fxml");
                 return;
             }
-
-            TextInputDialog qtyDialog = new TextInputDialog(isEdit ? String.valueOf(existing.getQuantity()) : "");
-            qtyDialog.setTitle(isEdit ? "Edit Item" : "Add Item");
-            qtyDialog.setHeaderText("Enter Quantity");
-            qtyDialog.setContentText("Quantity:");
-
-            qtyDialog.showAndWait().ifPresent(qtyStr -> {
-                try {
-                    int qty = Integer.parseInt(qtyStr.trim());
-                    if (qty <= 0) throw new NumberFormatException();
-
-                    TextInputDialog priceDialog = new TextInputDialog(isEdit ? String.valueOf(existing.getPrice()) : "");
-                    priceDialog.setTitle(isEdit ? "Edit Item" : "Add Item");
-                    priceDialog.setHeaderText("Enter Price");
-                    priceDialog.setContentText("Price:");
-
-                    priceDialog.showAndWait().ifPresent(priceStr -> {
-                        try {
-                            double price = Double.parseDouble(priceStr.trim());
-                            if (price <= 0) throw new NumberFormatException();
-
-                            User currentUser = SessionManager.getUser();
-                            com.app.inventory.utils.AccessControl accessControl = new com.app.inventory.utils.AccessControl(currentUser);
-
-                            if (accessControl.isAdmin()) {
-                                // Admin can choose type
-                                InventoryType defaultType = isEdit ? existing.getType() : InventoryType.RESTAURANT;
-
-                                ChoiceDialog<InventoryType> typeDialog = new ChoiceDialog<>(defaultType,
-                                        InventoryType.CLUB, InventoryType.RESTAURANT);
-                                typeDialog.setTitle(isEdit ? "Edit Item" : "Add Item");
-                                typeDialog.setHeaderText("Select Inventory Type");
-                                typeDialog.setContentText("Type:");
-
-                                typeDialog.showAndWait().ifPresent(selectedType -> {
-                                    // FIX: Ensure drinkCategory is not null to prevent database issues
-                                    String defaultDrinkCategory = "Beer"; // Reasonable default
-
-                                    InventoryItem item = new InventoryItem(0, name.trim(), qty, price, selectedType, defaultDrinkCategory);
-                                    performAddOrEdit(isEdit, existing, item, currentUser);
-                                });
-                            } else {
-                                // Staff can only create/edit their assigned type
-                                InventoryType assignedType = currentUser.getAssignedInventoryType();
-                                InventoryType itemType = isEdit ? existing.getType() : (forcedType != null ? forcedType : assignedType);
-
-                                if (isEdit && itemType != assignedType) {
-                                    showAlert("Access Denied", "You cannot edit items of different type than your assignment.", Alert.AlertType.ERROR);
-                                    return;
-                                }
-
-                                // FIX: Ensure drinkCategory is not null to prevent database issues
-                                String defaultDrinkCategory = "Beer"; // Reasonable default
-
-                                InventoryItem item = new InventoryItem(0, name.trim(), qty, price, itemType, defaultDrinkCategory);
-                                performAddOrEdit(isEdit, existing, item, currentUser);
-                            }
-                        } catch (NumberFormatException e) {
-                            showAlert("Invalid Input", "Price must be a positive number.", Alert.AlertType.ERROR);
-                        }
-                    });
-                } catch (NumberFormatException e) {
-                    showAlert("Invalid Input", "Quantity must be a positive integer.", Alert.AlertType.ERROR);
-                }
-            });
-        });
-    }
-
-    private void performAddOrEdit(boolean isEdit, InventoryItem existing, InventoryItem item, User currentUser) {
-        if (isEdit) {
-            item.setId(existing.getId());
-            InventoryDAO.update(item);
-            AuditService.logInventoryUpdate(currentUser, item.getName(), "127.0.0.1", "JavaFX App");
-            showAlert("Success", "Item updated successfully.", Alert.AlertType.INFORMATION);
-        } else {
-            // Set the creator ID for new items
-            item.setCreatorId(currentUser.getId());
-            InventoryDAO.add(item);
-            AuditService.logInventoryAdd(currentUser, item.getName(), "127.0.0.1", "JavaFX App");
-            showAlert("Success", "Item added successfully.", Alert.AlertType.INFORMATION);
+            loader.setLocation(res);
+            Stage stage = new Stage();
+            stage.setScene(new Scene(loader.load()));
+            stage.setTitle(item == null ? "Add Inventory Item" : "Edit Inventory Item");
+            AddEditInventoryController controller = loader.getController();
+            if (item != null) {
+                controller.setInventoryItem(item);
+            }
+            stage.showAndWait(); // wait for dialog to close
+            loadData(); // refresh table
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        loadInventoryData();
-    }
-
-    private void showAlert(String title, String msg, Alert.AlertType type) {
-        Alert alert = new Alert(type);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(msg);
-        alert.showAndWait();
     }
 
     @FXML
-    private void handleBack() {
+    public void handleDeleteItem() {
+        // Alias for handleDelete, or implement separate logic if needed
+        handleDelete(null);
+    }
 
-        Stage stage = (Stage) inventoryTable.getScene().getWindow();
-        SceneSwitcher.switchTo(stage, "dashboard.fxml");
+    @FXML
+    public void handleBack() {
+        Stage currentStage = (Stage) inventoryTable.getScene().getWindow();
+        SceneSwitcher.switchTo(currentStage, "dashboard.fxml");
     }
 }

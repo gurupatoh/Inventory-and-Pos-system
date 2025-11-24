@@ -30,13 +30,14 @@
             <TableColumn fx:id="colPrice" text="Price" prefWidth="90"/>
             <TableColumn fx:id="colType" text="Type" prefWidth="120"/>
             <TableColumn fx:id="colTotal" text="Total" prefWidth="90"/>
+            <TableColumn fx:id="colDate" text="Created At" prefWidth="120"/>
         </columns>
     </TableView>
 
     <!-- Summary -->
     <Label fx:id="totalValueLabel" text="Total Club Inventory Value: $0.00" alignment="CENTER_LEFT"/>
 
-
+    <!-- Buttons -->
     <HBox spacing="10" alignment="CENTER_RIGHT">
         <Button text="Add Item" onAction="#handleAddItem"/>
         <Button text="Edit Item" onAction="#handleEditItem"/>

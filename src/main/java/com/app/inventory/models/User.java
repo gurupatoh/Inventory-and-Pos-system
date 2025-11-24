@@ -1,86 +1,45 @@
 package com.app.inventory.models;
 
 public class User {
-
     private int id;
     private String username;
-    private String password;
+    private String password; // stored as hash in DB; in-memory may contain hash
     private Role role;
-
-    // NEW: Inventory type/location the user can access
     private InventoryType assignedInventoryType;
-
-    // Additional fields for auditing and management
     private String createdAt;
     private String lastLogin;
-    private boolean isActive;
-    private String createdBy;
-
-    public User(String username, String password, Role role) {
-        this.username = username;
-        this.password = password;
-        this.role = role;
-
-        // Default: Admin sees ALL; Staff must be assigned explicitly
-        if (role == Role.ADMIN) {
-            this.assignedInventoryType = InventoryType.ALL;
-        } else {
-            // Staff require explicit assignment - this should not be called for staff
-            throw new IllegalArgumentException("Staff users must be assigned an inventory type.");
-        }
-        this.isActive = true;
-    }
+    private boolean active;
 
     public User(String username, String password, Role role, InventoryType assignedInventoryType) {
+        this(0, username, password, role, assignedInventoryType, null, null, true);
+    }
+
+    public User(int id, String username, String password, Role role, InventoryType assignedInventoryType,
+                String createdAt, String lastLogin, boolean active) {
+        this.id = id;
         this.username = username;
         this.password = password;
         this.role = role;
-        this.assignedInventoryType = assignedInventoryType != null ? assignedInventoryType : InventoryType.ALL;
-        this.isActive = true;
+        this.assignedInventoryType = assignedInventoryType;
+        this.createdAt = createdAt;
+        this.lastLogin = lastLogin;
+        this.active = active;
     }
 
-    // ------------------------
-    // Getters & Setters
-    // ------------------------
-
+    // getters & setters
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) { this.username = username; }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) { this.password = password; }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public void setRole(Role role) { this.role = role; }
-
-    public InventoryType getAssignedInventoryType() {
-        return assignedInventoryType;
-    }
-
-    public void setAssignedInventoryType(InventoryType assignedInventoryType) {
-        this.assignedInventoryType = assignedInventoryType;
-    }
-
+    public String getUsername() { return username; }
+    public String getPassword() { return password; }
+    public Role getRole() { return role; }
+    public InventoryType getAssignedInventoryType() { return assignedInventoryType; }
+    public void setAssignedInventoryType(InventoryType assignedInventoryType) { this.assignedInventoryType = assignedInventoryType; }
     public String getCreatedAt() { return createdAt; }
     public void setCreatedAt(String createdAt) { this.createdAt = createdAt; }
-
     public String getLastLogin() { return lastLogin; }
     public void setLastLogin(String lastLogin) { this.lastLogin = lastLogin; }
-
-    public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
-
-    public String getCreatedBy() { return createdBy; }
-    public void setCreatedBy(String createdBy) { this.createdBy = createdBy; }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
+    public void setPassword(String password) { this.password = password; }
+    public void setRole(Role role) { this.role = role; }
 }

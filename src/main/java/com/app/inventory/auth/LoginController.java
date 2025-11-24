@@ -1,7 +1,5 @@
 package com.app.inventory.auth;
 
-import com.app.inventory.models.InventoryType;
-import com.app.inventory.models.Role;
 import com.app.inventory.models.User;
 import com.app.inventory.services.AuthService;
 import com.app.inventory.utils.SceneSwitcher;
@@ -34,22 +32,7 @@ public class LoginController {
             return;
         }
 
-        // Assign inventory type for staff users
-        if (user.getRole() == Role.STAFF) {
-            if (username.toLowerCase().contains("restaurant")) {
-                user.setAssignedInventoryType(InventoryType.RESTAURANT);
-            } else if (username.toLowerCase().contains("club")) {
-                user.setAssignedInventoryType(InventoryType.CLUB);
-            } else {
-                // default staff inventory type if none specified
-                user.setAssignedInventoryType(InventoryType.RESTAURANT);
-            }
-        } else {
-            // Admin sees all inventory
-            user.setAssignedInventoryType(null);
-        }
-
-        // Store user in session
+        // Store user in session (assignedInventoryType is already retrieved from database)
         SessionManager.setUser(user);
 
         // Navigate to dashboard

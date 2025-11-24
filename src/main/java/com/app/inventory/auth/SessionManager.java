@@ -1,24 +1,23 @@
 package com.app.inventory.auth;
 
-import com.app.inventory.dao.SessionDAO;
 import com.app.inventory.models.User;
 
 public class SessionManager {
-    private static User user;
+    private static User currentUser;
 
-    public static void setUser(User u) {
-        user = u;
-        if (u != null) {
-            SessionDAO.saveSession(u.getUsername());
-        }
+    public static void setUser(User user) {
+        currentUser = user;
     }
 
     public static User getUser() {
-        return user;
+        return currentUser;
     }
 
     public static void clearSession() {
-        user = null;
-        SessionDAO.clear();
+        currentUser = null;
+    }
+
+    public static int getCurrentUserId() {
+        return (currentUser != null) ? currentUser.getId() : -1;
     }
 }

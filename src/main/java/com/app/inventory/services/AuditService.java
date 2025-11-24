@@ -52,6 +52,27 @@ public class AuditService {
     }
 
     /**
+     * Log user created
+     */
+    public static void logUserCreate(User admin, String newUsername, String ip, String ua) {
+        AuditDAO.logAudit(admin.getId(), "USER_CREATE", "Created user: " + newUsername, ip, ua);
+    }
+
+    /**
+     * Log user deleted
+     */
+    public static void logUserDelete(User admin, String deletedUsername, String ip, String ua) {
+        AuditDAO.logAudit(admin.getId(), "USER_DELETE", "Deleted user: " + deletedUsername, ip, ua);
+    }
+
+    /**
+     * Log user password reset
+     */
+    public static void logUserResetPassword(User admin, String username, String ip, String ua) {
+        AuditDAO.logAudit(admin.getId(), "USER_RESET_PASSWORD", "Reset password for user: " + username, ip, ua);
+    }
+
+    /**
      * Get all audit logs (for admin)
      */
     public static List<AuditLog> getAllAuditLogs(User admin) {
@@ -79,7 +100,8 @@ public class AuditService {
             return null;
         }
         return AuditDAO.getAuditLogsByAction(action);
-    }
 
-    // Add more log methods as needed
+
+        // Add more log methods as needed
+    }
 }

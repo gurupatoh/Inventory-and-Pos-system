@@ -67,6 +67,14 @@ public class DatabaseInitializer {
                 System.out.println("Inventory schema migration ignored: " + e.getMessage());
             }
 
+            // Schema migrations for audit_logs table
+            try {
+                st.execute("ALTER TABLE audit_logs ADD COLUMN ip_address TEXT");
+                st.execute("ALTER TABLE audit_logs ADD COLUMN user_agent TEXT");
+            } catch (SQLException e) {
+                System.out.println("Audit schema migration ignored: " + e.getMessage());
+            }
+
             st.execute("""
                 CREATE TABLE IF NOT EXISTS audit_logs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
