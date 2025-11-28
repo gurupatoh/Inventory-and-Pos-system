@@ -7,45 +7,97 @@
 <VBox xmlns="http://javafx.com/javafx/17.0.2"
       xmlns:fx="http://javafx.com/fxml/1"
       fx:controller="com.app.inventory.controllers.ClubInventoryController"
-      spacing="15">
-
-    <!-- Padding -->
-    <padding>
-        <Insets top="15" right="15" bottom="15" left="15"/>
-    </padding>
+      spacing="0"
+      style="-fx-background-color: #f8fafc;">
 
     <!-- Header -->
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Club Inventory Management"
-               style="-fx-font-size: 18px; -fx-font-weight: bold;"/>
+    <HBox style="-fx-background-color: #2563eb; -fx-padding: 16 24; -fx-border-width: 0 0 1 0; -fx-border-color: #1e40af;">
+        <Label text="Club Inventory Management" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: white;"/>
         <Region HBox.hgrow="ALWAYS"/>
-        <Label text="Filter by Category:"/>
-        <ComboBox fx:id="filterTypeCombo" prefWidth="120"/>
+        <Label text="Manage club items and stock" style="-fx-font-size: 12px; -fx-text-fill: rgba(255,255,255,0.8);"/>
     </HBox>
 
-    <!-- Table -->
-    <TableView fx:id="inventoryTable" prefHeight="400" VBox.vgrow="ALWAYS">
-        <columns>
-            <TableColumn fx:id="colName" text="Name" prefWidth="180"/>
-            <TableColumn fx:id="colQuantity" text="Quantity" prefWidth="90"/>
-            <TableColumn fx:id="colPrice" text="Price" prefWidth="90"/>
-            <TableColumn fx:id="colType" text="Type" prefWidth="120"/>
-            <TableColumn fx:id="colTotal" text="Total" prefWidth="90"/>
-            <TableColumn fx:id="colDate" text="Created At" prefWidth="120"/>
-        </columns>
-    </TableView>
+    <!-- Main Content -->
+    <VBox spacing="16" VBox.vgrow="ALWAYS">
+        <padding>
+            <Insets top="24" right="24" bottom="24" left="24"/>
+        </padding>
 
-    <!-- Summary -->
-    <Label fx:id="totalValueLabel"
-           text="Total Club Inventory Value: $0.00"
-           alignment="CENTER_LEFT"/>
+        <!-- Statistics Cards -->
+        <HBox spacing="16">
+            <!-- Total Items Card -->
+            <VBox style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;" HBox.hgrow="ALWAYS">
+                <padding>
+                    <Insets top="16" bottom="16" left="16" right="16"/>
+                </padding>
+                <Label text="Total Items" style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                <Label text="156" style="-fx-text-fill: #2563eb; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+            </VBox>
 
-    <!-- Buttons -->
-    <HBox spacing="10" alignment="CENTER_RIGHT">
-        <Button text="Add Item" onAction="#handleAddItem"/>
-        <Button text="Edit Item" onAction="#handleEditItem"/>
-        <Button text="Delete Item" onAction="#handleDeleteItem"/>
-        <Button text="Back" onAction="#handleBack"/>
-    </HBox>
+            <!-- Total Stock Value Card -->
+            <VBox style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;" HBox.hgrow="ALWAYS">
+                <padding>
+                    <Insets top="16" bottom="16" left="16" right="16"/>
+                </padding>
+                <Label text="Inventory Value" style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                <Label text="KES 450,000" style="-fx-text-fill: #10b981; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+            </VBox>
+
+            <!-- Low Stock Items Card -->
+            <VBox style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;" HBox.hgrow="ALWAYS">
+                <padding>
+                    <Insets top="16" bottom="16" left="16" right="16"/>
+                </padding>
+                <Label text="Low Stock Items" style="-fx-text-fill: #64748b; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+                <Label text="8" style="-fx-text-fill: #f59e0b; -fx-font-size: 28px; -fx-font-weight: bold;"/>
+            </VBox>
+        </HBox>
+
+        <!-- Filter Section -->
+        <HBox spacing="12" alignment="CENTER_LEFT" style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 16;">
+            <Label text="Filter by Category:" style="-fx-text-fill: #475569; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+            <ComboBox fx:id="filterTypeCombo" promptText="Select category..." prefWidth="180" style="-fx-border-radius: 6; -fx-background-radius: 6; -fx-padding: 8; -fx-border-color: #e2e8f0; -fx-border-width: 1;"/>
+            <Button text="Search" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-padding: 8 16; -fx-background-radius: 6; -fx-font-size: 12px; -fx-cursor: hand;"/>
+            <Button text="Reset" style="-fx-background-color: transparent; -fx-text-fill: #2563eb; -fx-border-color: #2563eb; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 8 16; -fx-font-size: 12px; -fx-cursor: hand;"/>
+        </HBox>
+
+        <!-- Inventory Table Card -->
+        <VBox style="-fx-background-color: #ffffff; -fx-border-color: #e2e8f0; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8;" VBox.vgrow="ALWAYS" spacing="12">
+            <padding>
+                <Insets top="16" bottom="16" left="16" right="16"/>
+            </padding>
+
+            <Label text="Club Inventory Items" style="-fx-text-fill: #1e293b; -fx-font-size: 14px; -fx-font-weight: bold;"/>
+            <Separator style="-fx-padding: 0; -fx-border-color: #e2e8f0;"/>
+
+            <!-- Table -->
+            <TableView fx:id="inventoryTable" VBox.vgrow="ALWAYS" style="-fx-font-size: 12px;">
+                <columns>
+                    <TableColumn fx:id="colName" text="Item Name" prefWidth="180"/>
+                    <TableColumn fx:id="colQuantity" text="Quantity" prefWidth="90"/>
+                    <TableColumn fx:id="colPrice" text="Unit Price" prefWidth="100"/>
+                    <TableColumn fx:id="colType" text="Category" prefWidth="120"/>
+                    <TableColumn fx:id="colTotal" text="Total Value" prefWidth="110"/>
+                    <TableColumn fx:id="colDate" text="Created" prefWidth="120"/>
+                    <TableColumn text="Actions" prefWidth="100"/>
+                </columns>
+            </TableView>
+        </VBox>
+
+        <!-- Summary Section -->
+        <HBox alignment="CENTER_LEFT" style="-fx-background-color: #f0fdf4; -fx-border-color: #86efac; -fx-border-width: 1; -fx-border-radius: 8; -fx-background-radius: 8; -fx-padding: 16;">
+            <Label text="Total Club Inventory Value:" style="-fx-text-fill: #374151; -fx-font-size: 12px; -fx-font-weight: bold;"/>
+            <Label fx:id="totalValueLabel" text="KES 450,000.00" style="-fx-text-fill: #10b981; -fx-font-size: 16px; -fx-font-weight: bold; -fx-padding: 0 0 0 8;"/>
+        </HBox>
+
+        <!-- Action Buttons -->
+        <HBox spacing="12" alignment="CENTER_RIGHT">
+            <Button text="Add Item" onAction="#handleAddItem" style="-fx-background-color: #10b981; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6; -fx-cursor: hand;"/>
+            <Button text="Edit Item" onAction="#handleEditItem" style="-fx-background-color: #2563eb; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6; -fx-cursor: hand;"/>
+            <Button text="Delete Item" onAction="#handleDeleteItem" style="-fx-background-color: #ef4444; -fx-text-fill: white; -fx-font-weight: bold; -fx-padding: 10 20; -fx-background-radius: 6; -fx-cursor: hand;"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Back" onAction="#handleBack" style="-fx-background-color: transparent; -fx-text-fill: #475569; -fx-border-color: #d1d5db; -fx-border-width: 1; -fx-border-radius: 6; -fx-padding: 10 20; -fx-font-size: 12px; -fx-cursor: hand;"/>
+        </HBox>
+    </VBox>
 
 </VBox>
