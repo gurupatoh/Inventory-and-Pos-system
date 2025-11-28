@@ -1,5 +1,5 @@
 package com.app.inventory.controllers;
-
+import com.app.inventory.services.AuditService;
 import com.app.inventory.auth.SessionManager;
 import com.app.inventory.dao.InventoryDAO;
 import com.app.inventory.models.InventoryItem;
@@ -107,6 +107,8 @@ public class AddEditInventoryController {
             InventoryItem it = new InventoryItem(name, qty, price, type, creatorId);
             boolean success = InventoryDAO.insertInventory(it);
             if (success) {
+                // Log audit for inventory add
+                AuditService.logInventoryAdd(currentUser, name, "127.0.0.1", "JavaFX App");
                 new Alert(Alert.AlertType.INFORMATION, "Item added").showAndWait();
                 closeWindow();
             } else {
@@ -119,6 +121,8 @@ public class AddEditInventoryController {
             editing.setType(type);
             boolean ok = InventoryDAO.updateInventory(editing);
             if (ok) {
+                // Log audit for inventory update
+                AuditService.logInventoryUpdate(currentUser, name, "127.0.0.1", "JavaFX App");
                 new Alert(Alert.AlertType.INFORMATION, "Item updated").showAndWait();
                 closeWindow();
             } else {

@@ -30,20 +30,20 @@ public class AuditDAO {
 
     public static List<AuditLog> getAllAuditLogs() {
         List<AuditLog> list = new ArrayList<>();
-        String sql = "SELECT * FROM audit_logs ORDER BY timestamp DESC";
+        String sql = "SELECT id, user_id, action, details, timestamp, ip_address, user_agent FROM audit_logs ORDER BY timestamp DESC";
         try (Connection c = Database.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
                 AuditLog log = new AuditLog(
-                        rs.getInt("id"),
-                        rs.getObject("user_id") != null ? rs.getInt("user_id") : null,
-                        rs.getString("action"),
-                        rs.getString("details"),
-                        rs.getString("timestamp"),
-                        rs.getString("ip_address"),
-                        rs.getString("user_agent")
+                        rs.getInt(1), // id
+                        rs.getObject(2) != null ? rs.getInt(2) : null, // user_id
+                        rs.getString(3), // action
+                        rs.getString(4), // details
+                        rs.getString(5), // timestamp
+                        rs.getString(6), // ip_address
+                        rs.getString(7)  // user_agent
                 );
                 list.add(log);
             }
@@ -55,20 +55,20 @@ public class AuditDAO {
 
     public static List<AuditLog> getAuditLogsByUser(int userId) {
         List<AuditLog> list = new ArrayList<>();
-        String sql = "SELECT * FROM audit_logs WHERE user_id = ? ORDER BY timestamp DESC";
+        String sql = "SELECT id, user_id, action, details, timestamp, ip_address, user_agent FROM audit_logs WHERE user_id = ? ORDER BY timestamp DESC";
         try (Connection c = Database.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setInt(1, userId);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     AuditLog log = new AuditLog(
-                            rs.getInt("id"),
-                            rs.getInt("user_id"),
-                            rs.getString("action"),
-                            rs.getString("details"),
-                            rs.getString("timestamp"),
-                            rs.getString("ip_address"),
-                            rs.getString("user_agent")
+                            rs.getInt(1), // id
+                            rs.getInt(2), // user_id
+                            rs.getString(3), // action
+                            rs.getString(4), // details
+                            rs.getString(5), // timestamp
+                            rs.getString(6), // ip_address
+                            rs.getString(7)  // user_agent
                     );
                     list.add(log);
                 }
@@ -81,20 +81,20 @@ public class AuditDAO {
 
     public static List<AuditLog> getAuditLogsByAction(String action) {
         List<AuditLog> list = new ArrayList<>();
-        String sql = "SELECT * FROM audit_logs WHERE action = ? ORDER BY timestamp DESC";
+        String sql = "SELECT id, user_id, action, details, timestamp, ip_address, user_agent FROM audit_logs WHERE action = ? ORDER BY timestamp DESC";
         try (Connection c = Database.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
             ps.setString(1, action);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     AuditLog log = new AuditLog(
-                            rs.getInt("id"),
-                            rs.getObject("user_id") != null ? rs.getInt("user_id") : null,
-                            rs.getString("action"),
-                            rs.getString("details"),
-                            rs.getString("timestamp"),
-                            rs.getString("ip_address"),
-                            rs.getString("user_agent")
+                            rs.getInt(1), // id
+                            rs.getObject(2) != null ? rs.getInt(2) : null, // user_id
+                            rs.getString(3), // action
+                            rs.getString(4), // details
+                            rs.getString(5), // timestamp
+                            rs.getString(6), // ip_address
+                            rs.getString(7)  // user_agent
                     );
                     list.add(log);
                 }

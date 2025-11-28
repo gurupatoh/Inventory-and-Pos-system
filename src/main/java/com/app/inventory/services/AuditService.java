@@ -27,28 +27,28 @@ public class AuditService {
      * Log inventory access (view)
      */
     public static void logInventoryAccess(User user, String inventoryType, String ip, String ua) {
-        AuditDAO.logAudit(user.getId(), "INVENTORY_ACCESS", "Viewed inventory: " + inventoryType, ip, ua);
+        AuditDAO.logAudit(user.getId(), "INVENTORY_ACCESS", "by " + user.getUsername() + " Viewed inventory: " + inventoryType, ip, ua);
     }
 
     /**
      * Log inventory item added
      */
     public static void logInventoryAdd(User user, String itemName, String ip, String ua) {
-        AuditDAO.logAudit(user.getId(), "INVENTORY_ADD", "Added item: " + itemName, ip, ua);
+        AuditDAO.logAudit(user.getId(), "INVENTORY_ADD", "by " + user.getUsername() + " Added item: " + itemName, ip, ua);
     }
 
     /**
      * Log inventory item updated
      */
     public static void logInventoryUpdate(User user, String itemName, String ip, String ua) {
-        AuditDAO.logAudit(user.getId(), "INVENTORY_UPDATE", "Updated item: " + itemName, ip, ua);
+        AuditDAO.logAudit(user.getId(), "INVENTORY_UPDATE", "by " + user.getUsername() + " Updated item: " + itemName, ip, ua);
     }
 
     /**
      * Log inventory item deleted
      */
     public static void logInventoryDelete(User user, String itemName, String ip, String ua) {
-        AuditDAO.logAudit(user.getId(), "INVENTORY_DELETE", "Deleted item: " + itemName, ip, ua);
+        AuditDAO.logAudit(user.getId(), "INVENTORY_DELETE", "by " + user.getUsername() + " Deleted item: " + itemName, ip, ua);
     }
 
     /**

@@ -4,6 +4,7 @@ import com.app.inventory.dao.InventoryDAO;
 import com.app.inventory.models.InventoryItem;
 import com.app.inventory.models.InventoryType;
 import com.app.inventory.auth.SessionManager;
+import com.app.inventory.services.AuditService;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
@@ -91,6 +92,9 @@ public class InventoryController {
         }
         inventoryTable.setItems(FXCollections.observableArrayList(items));
 
+        // Log audit for inventory access
+        AuditService.logInventoryAccess(SessionManager.getUser(), filterType.name(), "127.0.0.1", "JavaFX App");
+
         // Calculate total inventory value
         double totalValue = items.stream()
                 .mapToDouble(item -> item.getQuantity() * item.getPrice())
@@ -106,6 +110,8 @@ public class InventoryController {
         InventoryItem selected = inventoryTable.getSelectionModel().getSelectedItem();
         if (selected != null) {
             if (InventoryDAO.deleteInventory(selected.getId())) {
+                // Log audit for inventory delete
+                AuditService.logInventoryDelete(SessionManager.getUser(), selected.getName(), "127.0.0.1", "JavaFX App");
                 loadData();
             }
         }

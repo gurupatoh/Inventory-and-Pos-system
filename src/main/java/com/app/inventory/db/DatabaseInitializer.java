@@ -67,16 +67,15 @@ public class DatabaseInitializer {
                 System.out.println("Inventory schema migration ignored: " + e.getMessage());
             }
 
-            // Schema migrations for audit_logs table
+            // Drop existing audit_logs table to ensure clean schema
             try {
-                st.execute("ALTER TABLE audit_logs ADD COLUMN ip_address TEXT");
-                st.execute("ALTER TABLE audit_logs ADD COLUMN user_agent TEXT");
+                st.execute("DROP TABLE IF EXISTS audit_logs");
             } catch (SQLException e) {
-                System.out.println("Audit schema migration ignored: " + e.getMessage());
+                System.out.println("Could not drop audit_logs table: " + e.getMessage());
             }
 
             st.execute("""
-                CREATE TABLE IF NOT EXISTS audit_logs (
+                CREATE TABLE audit_logs (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     user_id INTEGER,
                     action TEXT NOT NULL,
